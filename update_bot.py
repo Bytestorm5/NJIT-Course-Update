@@ -443,10 +443,11 @@ async def on_ready():
     print(f'We have logged in as {client.user}')
 
     client.tree.add_command(FollowGroup(name='follow', description='Follow a course or section'))
-    client.tree.copy_global_to(guild=client.get_guild(610972034738159617))
     client.tree.add_command(FeedGroup(name='feed', description='Feed updates to a course or section into the current channel'))
     client.tree.add_command(UnfollowGroup(name='unfollow', description='Unfollow a course or section'))
     client.tree.add_command(UnfeedGroup(name='unfeed', description='Stop feeding updates to a course or section to the current channel'))
+    
+    client.tree.copy_global_to(guild=client.get_guild(610972034738159617))
     
     await client.tree.sync()
 
