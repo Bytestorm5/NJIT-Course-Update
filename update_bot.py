@@ -181,6 +181,9 @@ class FeedGroup(app_commands.Group):
     async def course(self, interaction: discord.Interaction, course_code: str, section_added: bool, section_removed: bool, any_section_opens: bool, any_honors_opens: bool, any_online_opens: bool):
         if course_code in previous_json_data or course_code in listeners:            
             # Add course listener
+            if interaction.channel_id == None:
+                await interaction.response.send_message("Feed commands can only be executed in a channel")
+                return
             listener = CourseListener(interaction.channel_id, False, section_added, section_removed, any_section_opens, any_honors_opens, any_online_opens)
             if course_code in listeners:
                 # Remove all other listeners with this id
@@ -210,6 +213,9 @@ class FeedGroup(app_commands.Group):
     @app_commands.command()
     async def section(self, interaction: discord.Interaction, course_code: str, section: str, opens: bool, closes: bool, prof_changes: bool, timing_room_changes: bool):
         if course_code in previous_json_data and section in previous_json_data[course_code].get('sections', {}):
+            if interaction.channel_id == None:
+                await interaction.response.send_message("Feed commands can only be executed in a channel")
+                return
             listener = SectionListener(interaction.channel_id, False, opens, closes, prof_changes, timing_room_changes)
 
             if section not in listeners[course_code]['sections']:
@@ -447,7 +453,9 @@ async def on_ready():
     client.tree.add_command(UnfollowGroup(name='unfollow', description='Unfollow a course or section'))
     client.tree.add_command(UnfeedGroup(name='unfeed', description='Stop feeding updates to a course or section to the current channel'))
     
-    client.tree.copy_global_to(guild=client.get_guild(610972034738159617))
+    debug_server = client.get_guild(610972034738159617)
+    if debug_server != None:
+        client.tree.copy_global_to(guild=debug_server)
     
     await client.tree.sync()
 
