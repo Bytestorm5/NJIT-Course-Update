@@ -219,7 +219,7 @@ class FeedGroup(app_commands.Group):
                 listeners[course_code] = {}
                 listeners[course_code]['listeners'] = [listener]
 
-            message = f"You will be DMed when any of the following occur to {course_code}:\n"
+            message = f"A message will be sent in this channel when any of the following occur to {course_code}:\n"
             if section_added:
                 message += "- A section is added to this course\n"
             if section_removed:
@@ -334,7 +334,7 @@ class Notifier():
             await channel.send(embed=embed) # type: ignore
     
     async def section_add(self, course_code, section):
-        course_listens: list[CourseListener] = listeners[course_code]['listeners']
+        course_listens: list[CourseListener] = listeners.get(course_code, {}).get('listeners', [])
         # section_listens = course_listens['sections'][section]
         
         embed = discord.Embed(
@@ -350,7 +350,7 @@ class Notifier():
         await self.send_to_alls(embed)
                     
     async def section_remove(self, course_code, section):
-        course_listens: list[CourseListener] = listeners[course_code]['listeners']
+        course_listens: list[CourseListener] = listeners.get(course_code, {}).get('listeners', [])
         # section_listens = course_listens['sections'][section]
         
         embed = discord.Embed(
@@ -366,8 +366,8 @@ class Notifier():
         await self.send_to_alls(embed)
         
     async def section_open(self, course_code, section):
-        course_listens: list[CourseListener] = listeners[course_code]['listeners']
-        section_listens: list[SectionListener] = listeners[course_code]['sections'][section]
+        course_listens: list[CourseListener] = listeners.get(course_code, {}).get('listeners', [])
+        section_listens: list[SectionListener] = listeners.get(course_code, {}).get('sections', {}).get(section, [])
         section_data = previous_json_data[course_code]['sections'][section]
         
         embed = discord.Embed(
@@ -396,8 +396,8 @@ class Notifier():
         await self.send_to_alls(embed)
                 
     async def section_close(self, course_code, section):
-        course_listens: list[CourseListener] = listeners[course_code]['listeners']
-        section_listens: list[SectionListener] = course_listens['sections'][section]
+        course_listens: list[CourseListener] = listeners.get(course_code, {}).get('listeners', [])
+        section_listens: list[SectionListener] = listeners.get(course_code, {}).get('sections', {}).get(section, [])
         section_data = previous_json_data[course_code]['sections'][section]
         
         embed = discord.Embed(
@@ -426,8 +426,7 @@ class Notifier():
         await self.send_to_alls(embed)
                 
     async def section_prof_change(self, course_code, section):
-        course_listens: list[CourseListener] = listeners[course_code]['listeners']
-        section_listens: list[SectionListener] = course_listens['sections'][section]
+        section_listens: list[SectionListener] = listeners.get(course_code, {}).get('sections', {}).get(section, [])
         
         embed = discord.Embed(
             color=discord.Color(0xFFFFFF),
@@ -442,8 +441,7 @@ class Notifier():
         await self.send_to_alls(embed)
                 
     async def section_time_change(self, course_code, section):
-        course_listens: list[CourseListener] = listeners[course_code]['listeners']
-        section_listens: list[SectionListener] = course_listens['sections'][section]
+        section_listens: list[SectionListener] = listeners.get(course_code, {}).get('sections', {}).get(section, [])
         
         embed = discord.Embed(
             color=discord.Color(0xFFD800),
