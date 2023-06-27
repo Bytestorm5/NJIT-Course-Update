@@ -5,4 +5,4 @@ This bot checks for changes in the NJIT Course Schedule, and allows you to liste
 
 You can undo either with `/unfeed` and `/unfollow` respectively. Doing `/feed all` in a channel will create a feed of all changes to the schedule.
 
-You can add the bot using [this link](https://discord.com/api/oauth2/authorize?client_id=1122740667936952430&permissions=277025410112&scope=bot) or from the bot's profile.
+You can add the bot using [this link]([https://discord.com/api/oauth2/authorize?client_id=1122740667936952430&permissions=277025410112&scope=bot](https://discord.com/api/oauth2/authorize?client_id=1122740667936952430&permissions=277025410112&scope=applications.commands%20bot)https://discord.com/api/oauth2/authorize?client_id=1122740667936952430&permissions=277025410112&scope=applications.commands%20bot) or from the bot's profile.
