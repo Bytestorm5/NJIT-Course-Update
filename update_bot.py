@@ -468,17 +468,17 @@ async def check_for_changes():
     previous_json_data = get_json()
 
     while True:
-        await asyncio.sleep(10) 
+        await asyncio.sleep(60 * 5) 
 
         update_start = time.perf_counter()
         change_count = 0
 
         json_data = get_json()
 
-        for course in listeners.keys():
+        for course in set(json_data.keys()).union(set(previous_json_data.keys())):
             prev_state = previous_json_data.get(course, {'name':course, 'sections': {}})
             current_state = json_data.get(course, {'name':course, 'sections': {}})
-            
+
             for section in current_state['sections'].keys():
                 if section not in prev_state['sections']:
                     change_count += 1
@@ -526,6 +526,7 @@ async def check_for_changes():
 
         print_with_timestamp(f"Ticked update & listeners in {time.perf_counter() - update_start} seconds")
         print_with_timestamp(f"Pushed notifs for {change_count} schedule changes")
+        print()
         
 @client.event
 async def on_ready():
