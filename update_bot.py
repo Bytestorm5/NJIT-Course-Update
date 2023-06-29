@@ -120,7 +120,7 @@ def get_json():
             reconstructed_section['honors'] = 'H' in section[1]
             reconstructed_section['online'] = section[1][0] == '4'
             reconstructed_section['comment'] = section[7]
-            reconstructed_section['times'] = section[9]
+            reconstructed_section['times'] = set([tuple(time) for time in section[9]])
 
             reconstructed_course['sections'][section[1]] = reconstructed_section
         
@@ -425,14 +425,27 @@ class Notifier():
                 await self.send_to_listener(listener, embed)
         await self.send_to_alls(embed)
                 
-    async def section_prof_change(self, course_code, section):
+    async def section_prof_change(self, course_code, section, profs: tuple):
         section_listens: list[SectionListener] = listeners.get(course_code, {}).get('sections', {}).get(section, [])
         
+        print(f"PROFS: {profs}")
+        
+        #if profs != None:
+        if profs[0] == None or len(profs[0]) == 0:
+            profs[0] = "Unknown"
+        if profs[1] == None or len(profs[1]) == 0:
+            profs[1] = "Unknown"
         embed = discord.Embed(
             color=discord.Color(0xFFFFFF),
             title=f"{course_code}-{section} has changed professors!",
-            description=f"The professor for {course_code}-{section} has changed. Check your course schedule for details."
-        )        
+            description=f"The professor for {course_code}-{section} has changed from {str(profs[0])} to {str(profs[1])}."
+        )  
+        # else:
+        #     embed = discord.Embed(
+        #         color=discord.Color(0xFFFFFF),
+        #         title=f"{course_code}-{section} has changed professors!",
+        #         description=f"The professor for {course_code}-{section} has changed. Check your course schedule for details."
+        #     )        
         embed.set_footer(text="NJIT Course Update is an unofficial tool. Refer to the Self-Service Banner or an advisor for the most up-to-date information.")
         
         for listener in section_listens:
@@ -445,7 +458,7 @@ class Notifier():
         
         embed = discord.Embed(
             color=discord.Color(0xFFD800),
-            title=f"{course_code}-{section} has changed professors!",
+            title=f"{course_code}-{section} has changed times!",
             description=f"The timings or room for {course_code}-{section} has changed. Check your course schedule for details and make sure there are no conflicts."
         )        
         embed.set_footer(text="NJIT Course Update is an unofficial tool. Refer to the Self-Service Banner or an advisor for the most up-to-date information.")
@@ -496,7 +509,7 @@ async def check_for_changes():
                 # Was Open
                 if prev_section['taken_seats']+1 < prev_section['seats']:
                     # Now closed
-                    if curr_section['taken_seats']+1 >= prev_section['seats']:
+                    if curr_section['taken_seats'] >= prev_section['seats']:
                         print_with_timestamp(f"")
                         change_count += 1
                         await NOTIFICATION_MANAGER.section_close(course, curr_section['name'])
@@ -508,9 +521,9 @@ async def check_for_changes():
                         change_count += 1
                         await NOTIFICATION_MANAGER.section_open(course, curr_section['name'])
                         
-                if prev_section['prof'] != curr_section['prof']:
+                if prev_section['prof'] != curr_section['prof']:                    
                     change_count += 1
-                    await NOTIFICATION_MANAGER.section_prof_change(course, curr_section['name'])
+                    await NOTIFICATION_MANAGER.section_prof_change(course, curr_section['name'], profs=(prev_section['prof'], curr_section['prof']))
                     
                 if prev_section['times'] != curr_section['times']:
                     change_count += 1
