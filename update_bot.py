@@ -92,7 +92,7 @@ class ListenDecoder(json.JSONDecoder):
         return obj
 
 def get_json():
-    raw_content = requests.get(SCHEDULE_URL).content[15:-53]
+    raw_content = requests.get(SCHEDULE_URL).content[15:-55]
     raw_json = json.loads(raw_content)
 
     # They called me a madman
@@ -117,8 +117,8 @@ def get_json():
             reconstructed_section['seats'] = int(section[3].split('/')[1].strip())
             reconstructed_section['taken_seats'] = int(section[3].split('/')[0].strip())
             reconstructed_section['prof'] = section[4]
-            reconstructed_section['honors'] = 'H' in section[1]
-            reconstructed_section['online'] = section[1][0] == '4'
+            reconstructed_section['honors'] = 'H' in section[1] or 'honors' in str(section[7]).lower()
+            reconstructed_section['online'] = section[1][0] == '4' or 'online' in str(section[7]).lower()
             reconstructed_section['comment'] = section[7]
             reconstructed_section['times'] = set([tuple(time) for time in section[9]])
 
@@ -309,6 +309,7 @@ class UnfeedGroup(app_commands.Group):
             await interaction.response.send_message("Unfeed commands can only be executed in a channel")
             return
         listeners['all'][:] = [obj for obj in listeners['all'] if obj.id != interaction.channel_id]
+
 class Notifier():
     def __init__(self) -> None:
         pass
@@ -327,6 +328,10 @@ class Notifier():
                 return
             await channel.send(embed=embed) # type: ignore
     async def send_to_alls(self, embed):
+        global listeners
+        print(f"[DEBUG]: \"All\" Listeners: {listeners.get('all', [])}")
+        print(f" - Found 'all' Field: {'all' in listeners}")
+        
         for listener in listeners.get('all', []):
             channel = client.get_channel(listener)                    
             if channel == None or channel.type != discord.ChannelType.text: # type: ignore
